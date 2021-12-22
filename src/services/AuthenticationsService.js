@@ -1,4 +1,4 @@
-const mysql = require('mysql');
+const mysql = require('mysql2');
 const InvariantError = require('../exception/InvariantError');
 
 class AuthenticationsService {

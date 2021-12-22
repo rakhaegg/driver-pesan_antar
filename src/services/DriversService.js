@@ -5,7 +5,7 @@ const InvariantError = require('../exception/InvariantError');
 const NotFoundError = require('../exception/NotFoundError');
 const AuthenticationError = require('../exception/AuthenticationError');
 
-const mysql = require('mysql');
+const mysql = require('mysql2');
 const { func } = require('joi');
 class DriverService {
     constructor() {
@@ -42,9 +42,9 @@ class DriverService {
         var isZero = 0
         const result = await this._connection.query('SELECT username FROM driver WHERE username = ?', [username], function (error, results, fields) {
             isZero = results.length
-
-
+            console.log(isZero)
         })
+        
         let sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
         await sleep(1000)
         if (isZero != 0) {

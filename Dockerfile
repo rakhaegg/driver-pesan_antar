@@ -13,4 +13,6 @@ RUN npm install --production
 
 COPY . .
 
-CMD [ "node", "server.js" ]
+EXPOSE 5000
+
+CMD [ "npm", "run" , "start-prod" ]
