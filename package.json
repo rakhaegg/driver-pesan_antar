@@ -7,14 +7,16 @@
     "start-prod": "NODE_ENV=production nodemon ./src/server.js",
     "start": "nodemon ./src/server.js",
     "migrate": "node-pg-migrate",
-    "test": "jest --watchAll"
+    "test": "lab -v  example.test.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@hapi/code": "^8.0.5",
     "@hapi/hapi": "^20.2.1",
     "@hapi/jwt": "^2.1.0",
+    "@hapi/lab": "^24.4.0",
     "bcrypt": "^5.0.1",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",

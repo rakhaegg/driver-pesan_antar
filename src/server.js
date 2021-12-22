@@ -20,14 +20,14 @@ const driver = require('./api/driver')
 const DriverService = require('./services/DriversService')
 const DriversValidator = require('./validator/driver')
 
-
 // mysql
 
 
 const init = async () => {
     
-    const driverService = new DriverService()
+    const driverService = new DriverService();
     const authenticationsService = new AuthenticationsService();
+    
     const server = Hapi.server({
         port: process.env.PORT,
         host: process.env.HOST,
@@ -36,9 +36,9 @@ const init = async () => {
                 origin: ['*'],
             }
         }
-
+    
     })
-
+    
     await server.register([
         {
             plugin: Jwt
@@ -83,8 +83,29 @@ const init = async () => {
 
 
     ]);
-    await server.start();
+    
+    
+    return server;
+};
 
-    console.log(`Server berjalan pada ${server.info.uri}`);
+
+const start = async () => {
+    let server;
+    server = await init();
+    await server.start();
+    console.log(`Server running at: ${server.info.uri}`);
+    return server;
+};
+
+
+init();
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+ };
+async function begin() {
+    await sleep(300);
+    start();    
 }
-init()
+begin();
+
+module.exports = init
