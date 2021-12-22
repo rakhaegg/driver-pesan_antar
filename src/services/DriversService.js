@@ -7,6 +7,7 @@ const AuthenticationError = require('../exception/AuthenticationError');
 
 const mysql = require('mysql2');
 const { func } = require('joi');
+const { use } = require('bcrypt/promises');
 class DriverService {
     constructor() {
         this._connection = mysql.createPool({
@@ -15,96 +16,59 @@ class DriverService {
             database: process.env.DB_DATABASE,
             port: 3306
         });
-
     }
 
     async addDriver({ username, password, fullname }) {
         await this.verifyNewUsername(username);
         const id = `driver-${nanoid(16)}`;
-
         const hashedPassword = await bcrypt.hash(password, 10);
-
         var query = 'INSERT INTO driver VALUES ? '
-
         var values = [
             [id, username, hashedPassword, fullname],
         ]
-
-        const result = await this._connection.query(query, [values], function (error, results, fields) {
-            if (error) throw error
-        })
-
-
+        this._connection.promise().query(query, [values]).then((results) => {
+        }).catch(console.log)
     }
 
     async verifyNewUsername(username) {
-
-        var isZero = 0
-        const result = await this._connection.query('SELECT username FROM driver WHERE username = ?', [username], function (error, results, fields) {
-            isZero = results.length
-            console.log(isZero)
-        })
-        
-        let sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
-        await sleep(1000)
-        if (isZero != 0) {
+        const promisePool = this._connection.promise()
+        const [rows, fields] = await promisePool.query('SELECT username FROM driver WHERE username = ?', [username])
+        if (rows.length != 0) {
             throw new InvariantError('User telah ada')
         }
     }
 
 
     async getDriverById(userId) {
-        var check = 0 
-        var result = {"id" : " ", "username" : " " , "fullname" : " "}
-        this._connection.query("SELECT id, username, fullname FROM driver WHERE id = ? ", [userId] , function (error, results, fields) {
-            if (error) throw error
-            result.fullname = results[0].fullname
-            result.id = results[0].id
-            result.username = results[0].username
-            check = results.length
-        })
-        let sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
-        await sleep(1000)
-
-        if (check == 0) throw new NotFoundError('User tidak ditemukan')
+        var result = { "id": " ", "username": " ", "fullname": " " }
+        const promisePool = this._connection.promise()
+        const [rows, fields] = await promisePool.query("SELECT id, username, fullname FROM driver WHERE id = ? ", [userId])
+        if (rows.length == 0) {
+            throw new NotFoundError('User tidak ada')
+        }
+        result.id = rows[0].id
+        result.username = rows[0].username
+        result.fullname = rows[0].fullname
         return result
-    }   
+    }
 
     async verifyUserCredential(username, password) {
-        var isZero = 0
+        const promisePool = this._connection.promise()
 
-        this._connection.query('SELECT id, password FROM driver WHERE username = ?', [username], async function (error, results, fields) {
-            if (error) throw error
-            isZero = results.length
 
-            
-
-        })
-        let sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
-        await sleep(1000)
+        const [rows , fields ] = await promisePool.query('SELECT id, password FROM driver WHERE username = ?' , [username])
         
-        if (isZero == 0) {
-            throw new NotFoundError('Tidak ditemuka')
+        if (rows.length == 0) {
+            throw new NotFoundError('User tidak ada')
         }
+        const { id, password: hashedPassword } = rows[0]
 
-
-        var check = false
-        this._connection.query('SELECT id, password FROM driver WHERE username = ?', [username], async function (error, results, fields) {
-            if (error) throw error
-            isZero = results.length
-
-            const { id, password: hashedPassword } = results[0]
-            const match = await bcrypt.compare(password, hashedPassword)
-            check = match
-            return id;
-
-
-        })
-        await sleep(1000)
-        if (!check) {
-            throw new AuthenticationError('Kredensial yang Anda berikan salah');
+        const match = await bcrypt.compare(password, hashedPassword)
+        if(!match){
+            throw new AuthenticationError('Kredensial yang diberikan salah')
         }
-
+        // const [rows , fields  ] =  await promisePool.query('SELECT id, password FROM driver WHERE username = ?'  . [username])
+        return id
 
     }
 }

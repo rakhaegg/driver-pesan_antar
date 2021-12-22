@@ -12,37 +12,28 @@ class AuthenticationsService {
   }
 
   async addRefreshToken(token) {
+    const promisePool = this._connection.promise()
 
-    await this._connection.query("INSERT INTO authentications VALUES (?) ", [token], function (error, results, fields) {
-      if (error) throw error
+    await promisePool.query("INSERT INTO authentications VALUES (?) ", [token])
 
-    });
+
   }
 
   async verifyRefreshToken(token) {
-    var checkTokenValid = 0
-    await this._connection.query("SELECT token FROM authentications WHERE token = ? ", [token], function (error, results, fields) {
-      if (error) throw error
-      checkTokenValid = results.length
+    const promisePool = this._connection.promise()
+    const [rows , fields] = await promisePool.query("SELECT token FROM authentications WHERE token = ? ", [token] )
 
-    });
-
-    let sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
-    await sleep(1000)
-
-    if (checkTokenValid == 0) {
-      throw new InvariantError('Refresh token tidak valid');
+    if (rows.length  == 0){
+      throw new InvariantError('User tidak ditemukan')
     }
   }
 
   async deleteRefreshToken(token) {
     await this.verifyRefreshToken(token);
+    const promisePool = this._connection.promise()
 
 
-    await this._connection.query("DELETE FROM authentications WHERE token = ? ", [token], function (error, results, fields) {
-      if (error) throw error
-
-    });
+    await promisePool.query("DELETE FROM authentications WHERE token = ? ", [token])
   }
 }
 
