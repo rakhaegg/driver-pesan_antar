@@ -78,16 +78,12 @@ jobs:
                   echo "SSH not available..."
           done; echo "SSH ready!"
           
-      - name: 'Running Docker Compose'
+      - name: 'Running Docker'
         uses: appleboy/ssh-action@master
         with:
           host: ${{env.INSTANCE_IP}}
           username: ubuntu
           key: ${{ secrets.VM_SSH_PRIVATE_KEY}}
           script: |
-            sudo docker pull rakhaeg/toko:latest
-            sudo docker pull rakhaeg/api:latest
-            sudo docker-compose up -d --build
-        
-      - name: Run functional tests
-        run:  go test -v
+            sudo docker pull rakhaeg/driver:latest
+            sudo docker run -p 5001:5001 rakhaeg/driver
