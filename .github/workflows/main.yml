@@ -86,4 +86,4 @@ jobs:
           key: ${{ secrets.VM_SSH_PRIVATE_KEY}}
           script: |
             sudo docker pull rakhaeg/driver:latest
-            sudo docker run -p 5001:5001 rakhaeg/driver
+            sudo docker run -p 5001:5001 -d rakhaeg/driver
