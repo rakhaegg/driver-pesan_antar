@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Mengecek repository code
-      - uses : 'actions/checkout@v2'
+      - uses : actions/checkout@v2
         
         # Install node js 
       - name : 'Setup Node js'
