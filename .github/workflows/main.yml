@@ -11,7 +11,31 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    
+      # Mengecek repository code
+      - uses : 'actions/checkout@v2'
+        
+        # Install node js 
+      - name : 'Setup Node js'
+      - uses: actions/setup-node@v2
+        with:
+             node-version: '14'
+         
+      - run: npm install
+      - run: npm test
+      
+         # Login ke Docker
+      - name: 'Login to Dockerhub'
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+        
+        # Build Repo dan push ke github
+      - name: 'Build and push'
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/driver .
+          docker push ${{ secrets.DOCKERHUB_USERNAME}}/driver
+      
       - name: 'Write Config & Key Files'
         run: |
           mkdir ~/.oci
@@ -85,5 +109,4 @@ jobs:
           username: ubuntu
           key: ${{ secrets.VM_SSH_PRIVATE_KEY}}
           script: |
-            sudo docker pull rakhaeg/driver:latest
-            sudo docker run -p 5001:5001 -d rakhaeg/driver
+                sudo docker run -p 5001:5001 -d rakhaeg/driver
